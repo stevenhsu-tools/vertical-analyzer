@@ -335,7 +335,9 @@ Instructions:
         newRows[globalIdx][targetColName] = result.selected_vertical;
         newRows[globalIdx][notesColName] = result.note + (result.is_out_of_business ? " [POSSIBLE OUT OF BUSINESS]" : "");
         
-        if (row[colMap.status]?.toLowerCase().includes('out of business')) {
+        // FIX: Ensure status is treated as a string to prevent crashes if Excel reads it as a number
+        const statusVal = row[colMap.status] || '';
+        if (String(statusVal).toLowerCase().includes('out of business')) {
              newRows[globalIdx][notesColName] = `[CONFIRMED OUT OF BUSINESS] ${newRows[globalIdx][notesColName]}`;
         }
       });
@@ -668,7 +670,10 @@ Instructions:
 
                       const aiVertical = row[targetColName];
                       const currentVertical = row[currentColName];
-                      const isMismatch = aiVertical && currentVertical && aiVertical.trim().toLowerCase() !== currentVertical.trim().toLowerCase();
+                      
+                      // FIX: Safely convert to strings before trimming to prevent React from crashing (White Screen) 
+                      // if an Excel cell accidentally contains numbers instead of text.
+                      const isMismatch = aiVertical && currentVertical && String(aiVertical).trim().toLowerCase() !== String(currentVertical).trim().toLowerCase();
                       const isError = aiVertical === 'FATAL_ERROR' || aiVertical === 'Error';
 
                       return (
